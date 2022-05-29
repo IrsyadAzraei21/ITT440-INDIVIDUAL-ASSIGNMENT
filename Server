@@ -1,0 +1,60 @@
+#include <stdio.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+
+int main(int argc, char *argv[])
+{
+  int sockdc, rd_size, cl_sock, k;
+  char cl_message[1500];
+  struct sockaddr_in server, client;
+
+  sockdc = socket(AF_INET, SOCK_STREAM, 0);  //Creating socket
+  if(sockdc == -1)
+  {
+    printf("Socket can't be created");
+  }
+  puts("Socket is created");
+
+  server.sin_family = AF_INET;
+  server.sin_port = htons(23);
+  server.sin_addr.s_addr = INADDR_ANY;
+
+  if(bind(sockdc, (struct sockaddr *)&server, sizeof(server)) < 0)  //Binding
+  {
+    perror("binding has failed");
+    return 1;
+  }
+  puts("bind has been done");
+
+  listen(sockdc, 3); //Listening
+
+  puts("Waiting for connection");
+  k = sizeof(struct sockaddr_in);
+
+  cl_sock = accept(sockdc, (struct sockaddr *)&client, (socklen_t*)&k);
+  if(cl_sock < 0)
+  {
+    perror("Acceting has failed");
+    return 1;
+  }
+  puts("Connection successfully accepted");
+
+  while((rd_size = recv(cl_sock, cl_message, 1500, 0)) > 0)
+  {
+    write(cl_sock, cl_message, strlen(cl_message));
+  }
+
+  if(rd_size == 0)
+  {
+    puts("Client has been disconnected");
+    fflush(stdout);
+  }
+  else if(rd_size == -1)
+  {
+    perror("Receiving has failed");
+  }
+
+  return 0;
+}
