@@ -1,0 +1,51 @@
+#include <stdio.h>
+#include <sys/socket.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+
+int main(int argc, char *argv[])
+{
+  int sockfd;
+  char message[1500], svr_reply[2000];
+  struct sockaddr_in server;
+
+  sockfd = socket(AF_INET, SOCK_STREAM, 0);
+  if(sockfd == -1)
+  {
+    printf("Socket cannot be created");
+  }
+  printf("Socket is created");
+
+  server.sin_family = AF_INET;
+  server.sin_addr.s_addr = inet_addr("192.168.56.105");
+  server.sin_port = htons(23);
+
+  if(connect(sockfd,(struct sockaddr *)&server, sizeof(server)) < 0)
+  {
+    perror("Error!Connection has failed");
+    return 1;
+  }
+  puts("Connection has successed");
+
+  while(1)
+  {
+    printf("Hello, what do you want to ask? Ask away: ");
+    scanf("%s",message);
+
+    if(send (sockfd, message, strlen(message), 0)
+    {
+      puts("Error!Sending has failed");
+      return 1;
+    }
+    if(recv (sockfd, svr_reply, 2000, 0) < 0)
+    {
+      printf("Error!Receiving has failed");
+      break;
+    }
+
+    printf("Server Reply: ");
+    puts(svr_reply);
+  }
+  return 0;
+}
